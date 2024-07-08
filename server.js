@@ -25,7 +25,7 @@ const app = express();
 // Enable CORS for all routes
 app.use(
   cors({
-    origin: "http://localhost:3000", // Allow requests from this origin
+    origin: "https://attache-manager.netlify.app", // Allow requests from this origin
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
     credentials: true, // Allow cookies to be sent
