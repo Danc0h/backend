@@ -1,8 +1,8 @@
 import express from "express";
 import mongoose from "mongoose";
-import path from "path";
 import dotenv from "dotenv";
 import userRouter from "./routes/userRoutes.js";
+import orderRouter from "./routes/orderRoutes.js";
 import cors from "cors";
 
 dotenv.config();
@@ -11,26 +11,20 @@ mongoose
   .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    tlsInsecure: true,
+    // Remove the following line if you don't have a specific reason for it
+    // tlsInsecure: true,
   })
   .then(() => {
-    console.log("connected to db");
+    console.log("Connected to MongoDB");
   })
   .catch((err) => {
-    console.error("Error connecting to db", err.message);
+    console.error("Error connecting to MongoDB:", err.message);
   });
 
 const app = express();
 
 // Enable CORS for all routes
-app.use(
-  cors({
-    origin: "https://attache-manager.netlify.app", // Allow requests from this origin
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed methods
-    allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
-    credentials: true, // Allow cookies to be sent
-  })
-);
+app.use(cors());
 
 app.options("*", cors()); // Handle preflight requests
 
@@ -38,16 +32,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/users", userRouter);
-
-const __dirname = path.resolve();
-app.use(
-  express.static(path.join(__dirname, "/frontend/my-new-react-app/build"))
-);
-app.get("*", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "/frontend/my-new-react-app/build/index.html")
-  );
-});
+app.use("/api/orders", orderRouter);
 
 // Define error handler for express
 app.use((err, req, res, next) => {
@@ -56,5 +41,5 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 9000;
 app.listen(port, () => {
-  console.log(`serve at http://localhost:${port}`);
+  console.log(`Server is running at http://localhost:${port}`);
 });
