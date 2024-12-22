@@ -12,22 +12,24 @@ import {
 
 const userRouter = express.Router();
 
+// Fetch all users with only name and email fields
 userRouter.get(
   "/",
   isAuth,
   isAdmin,
   expressAsyncHandler(async (req, res) => {
-    const users = await User.find({});
+    const users = await User.find({}, "name email"); // Only return name and email
     res.send(users);
   })
 );
 
+// Fetch a single user by ID with only name and email fields
 userRouter.get(
   "/:id",
   isAuth,
   isAdmin,
   expressAsyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id, "name email"); // Only return name and email
     if (user) {
       res.send(user);
     } else {
@@ -36,6 +38,7 @@ userRouter.get(
   })
 );
 
+// Update a user by ID with only name and email fields allowed to be updated
 userRouter.put(
   "/:id",
   isAuth,
@@ -45,12 +48,7 @@ userRouter.put(
     if (user) {
       user.name = req.body.name || user.name;
       user.email = req.body.email || user.email;
-      user.course = req.body.course || user.course;
-      user.school = req.body.school || user.school;
-      user.department = req.body.department || user.department;
-      user.startDate = req.body.startDate || user.startDate;
-      user.endDate = req.body.endDate || user.endDate;
-      user.isAdmin = Boolean(req.body.isAdmin);
+      // Only update name and email, remove other fields
       const updatedUser = await user.save();
       res.send({ message: "User Updated", user: updatedUser });
     } else {
@@ -59,6 +57,7 @@ userRouter.put(
   })
 );
 
+// Sign in route with only name, email, and token
 userRouter.post(
   "/signin",
   expressAsyncHandler(async (req, res) => {
@@ -79,20 +78,11 @@ userRouter.post(
   })
 );
 
+// Send OTP for registration (only include name, email, and password)
 userRouter.post(
   "/send-otp",
   expressAsyncHandler(async (req, res) => {
-    const {
-      name,
-      email,
-      course,
-      school,
-      department,
-      password,
-      startDate,
-      endDate,
-    } = req.body;
-
+    const { name, email, password } = req.body; // Only use name, email, and password
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).send({ message: "User already exists" });
@@ -108,33 +98,17 @@ userRouter.post(
     res.send({
       name,
       email,
-      course,
-      school,
-      department,
-      startDate,
-      endDate,
       password: bcrypt.hashSync(password, 8),
       hashedOTP,
     });
   })
 );
 
-// Endpoint to verify OTP and create user
+// Verify OTP and create user (only name, email, and password are involved)
 userRouter.post(
   "/verify-otp",
   expressAsyncHandler(async (req, res) => {
-    const {
-      name,
-      email,
-      course,
-      school,
-      department,
-      startDate,
-      endDate,
-      password,
-      otp,
-      hashedOTP,
-    } = req.body;
+    const { name, email, password, otp, hashedOTP } = req.body; // Only include name, email, and password
 
     const isOTPValid = bcrypt.compareSync(otp, hashedOTP);
     if (!isOTPValid) {
@@ -145,11 +119,6 @@ userRouter.post(
     const newUser = new User({
       name,
       email,
-      course,
-      school,
-      department,
-      startDate,
-      endDate,
       password,
       isVerified: true,
     });
@@ -160,17 +129,13 @@ userRouter.post(
       _id: createdUser._id,
       name: createdUser.name,
       email: createdUser.email,
-      course: createdUser.course,
-      school: createdUser.school,
-      department: createdUser.department,
-      startDate: createdUser.startDate,
-      endDate: createdUser.endDate,
       isAdmin: createdUser.isAdmin,
       token: generateToken(createdUser),
     });
   })
 );
 
+// Update user profile (only name, email, and password)
 userRouter.put(
   "/profile",
   isAuth,
@@ -197,6 +162,7 @@ userRouter.put(
   })
 );
 
+// Delete user by ID (no change needed here)
 userRouter.delete(
   "/:id",
   isAuth,
@@ -213,15 +179,6 @@ userRouter.delete(
     } else {
       res.status(404).send({ message: "User Not Found" });
     }
-  })
-);
-
-userRouter.get(
-  "/department/:department",
-  expressAsyncHandler(async (req, res) => {
-    const { department } = req.params;
-    const users = await User.find({ department });
-    res.send(users);
   })
 );
 

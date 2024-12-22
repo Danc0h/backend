@@ -2,7 +2,9 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import userRouter from "./routes/userRoutes.js";
-import orderRouter from "./routes/orderRoutes.js";
+import seedRouter from "./routes/seedRoutes.js";
+import tipsRouter from "./routes/tipsRoutes.js";
+import progressRouter from "./routes/progressRoutes.js";
 import cors from "cors";
 
 dotenv.config();
@@ -32,7 +34,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/users", userRouter);
-app.use("/api/orders", orderRouter);
+app.use("/api/tips", tipsRouter);
+app.use("/api/progress", progressRouter);
+app.use("/api/seed", seedRouter);
 
 // Define error handler for express
 app.use((err, req, res, next) => {
